@@ -783,5 +783,16 @@ bool SortedMap::DefragIfNeeded(float ratio) {
   return reallocated;
 }
 
+std::optional<SortedMap::RankAndScore> SortedMap::GetRankAndScore(sds ele, bool reverse) const {
+  ScoreSds obj = score_map->FindObj(ele);
+  if (obj == nullptr)
+    return std::nullopt;
+
+  optional rank = score_tree->GetRank(obj);
+  DCHECK(rank);
+
+  return SortedMap::RankAndScore{reverse ? score_map->UpperBoundSize() - *rank - 1 : *rank,
+                                 GetObjScore(obj)};
+}
 }  // namespace detail
 }  // namespace dfly
